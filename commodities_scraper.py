@@ -487,7 +487,7 @@ class DatabaseManager:
             
             # Table 1: Daily commodities data
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS commodities_daily (
+                CREATE TABLE IF NOT EXISTS trd_commodities_daily (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     date DATE NOT NULL,
                     asset VARCHAR(50),
@@ -509,7 +509,7 @@ class DatabaseManager:
             
             # Table 2: Strong leads tracking
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS strong_leads_daily (
+                CREATE TABLE IF NOT EXISTS trd_strong_leads_daily (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     date DATE NOT NULL,
                     ranking INT,
@@ -532,7 +532,7 @@ class DatabaseManager:
             
             # Table 3: Investment opportunities tracking
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS investment_opportunities_daily (
+                CREATE TABLE IF NOT EXISTS trd_investment_opportunities_daily (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     date DATE NOT NULL,
                     timeframe VARCHAR(20),
@@ -570,7 +570,7 @@ class DatabaseManager:
             
             for _, row in df.iterrows():
                 cursor.execute("""
-                    INSERT INTO commodities_daily 
+                    INSERT INTO trd_commodities_daily 
                     (date, asset, name, unit, price, change_value, daily_pct, weekly_pct, 
                      monthly_pct, yearly_pct, three_year_pct, update_date)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -598,7 +598,7 @@ class DatabaseManager:
             
             for _, row in df.iterrows():
                 cursor.execute("""
-                    INSERT INTO strong_leads_daily 
+                    INSERT INTO trd_strong_leads_daily 
                     (date, ranking, rank_asset, asset, name, unit, price, daily_pct, weekly_pct,
                      monthly_pct, yearly_pct, match_info, update_date)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -637,7 +637,7 @@ class DatabaseManager:
                     yearly_pct = row.get('Yearly %', None)
                     
                     cursor.execute("""
-                        INSERT INTO investment_opportunities_daily 
+                        INSERT INTO trd_investment_opportunities_daily 
                         (date, timeframe, ranking, rank_asset, asset, name, unit, price,
                          daily_pct, weekly_pct, monthly_pct, yearly_pct, update_date)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -672,8 +672,8 @@ class DatabaseManager:
                     t.daily_pct as current_daily_pct,
                     t.weekly_pct as current_weekly_pct,
                     t.match_info as current_match
-                FROM strong_leads_daily t
-                LEFT JOIN strong_leads_daily p ON t.name = p.name AND t.asset = p.asset
+                FROM trd_strong_leads_daily t
+                LEFT JOIN trd_strong_leads_daily p ON t.name = p.name AND t.asset = p.asset
                     AND p.date = DATE_SUB(%s, INTERVAL %s DAY)
                 WHERE t.date = %s
                 ORDER BY ABS(p.ranking - t.ranking) DESC
@@ -943,18 +943,38 @@ class CommoditiesApp:
         return self.data_manager
 
 
+def load_db_credentials(filepath: str = 'DBcredentials.txt') -> dict:
+    """Load database credentials from file.
+    File format (one value per line):
+    Line 1: username
+    Line 2: password
+    Line 3: database name
+    """
+    try:
+        with open(filepath, 'r') as f:
+            lines = [line.strip() for line in f.readlines()]
+            return {
+                'host': 'localhost',
+                'user': lines[0] if len(lines) > 0 else 'root',
+                'password': lines[1] if len(lines) > 1 else '',
+                'database': lines[2] if len(lines) > 2 else 'tradeview'
+            }
+    except FileNotFoundError:
+        print(f"Warning: {filepath} not found. Using default credentials.")
+        return {
+            'host': 'localhost',
+            'user': 'root',
+            'password': 'YOUR_PASSWORD',
+            'database': 'tradeview'
+        }
+
 def main():
     """Main entry point"""
     # Read URL from file
     url = "https://tradingeconomics.com/commodities"
     
-    # Database configuration (update these with your MySQL credentials)
-    db_config = {
-        'host': 'localhost',
-        'user': 'root',
-        'password': 'Ilms2009',  # Add your MySQL password here
-        'database': 'commodities_db'
-    }
+    # Database configuration (loaded from DBcredentials.txt)
+    db_config = load_db_credentials()
     
     # Notification settings - Set to True to enable alerts
     notifications_enabled = False  # Change to True to enable email/SMS alerts
