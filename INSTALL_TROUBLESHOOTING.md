@@ -6,64 +6,78 @@
 ```
 Preparing metadata (pyproject.toml) ... error
 exit code: 1
+ERROR: None of values ['c11'] are supported by the C compiler
 ```
 
-### Solutions
+### Root Cause
+Server has old C compiler (VS 15.9.17 / Visual Studio 2017) that doesn't support C11 standard required by pandas 2.3.3.
 
-#### Solution 1: Install Pre-built Binary Wheels (Recommended)
+---
+
+## 🚀 FASTEST SOLUTION (No Compiler Upgrade)
+
+### Use Compatible Requirements File
 ```bash
-# Upgrade pip first
-python -m pip install --upgrade pip
-
-# Install all dependencies from requirements.txt
-pip install -r requirements.txt --prefer-binary
+pip install -r requirements_compatible.txt
 ```
 
-#### Solution 2: Install Specific Pandas Version
-```bash
-# Try an older, stable version
-pip install pandas==2.0.3
-```
+This installs pandas 2.0.3 which works with older compilers.
 
-#### Solution 4: Upgrade C++ Compiler (If you need latest pandas)
+---
 
-**Option A: Install Visual Studio 2019 or 2022 Build Tools**
-1. Download Build Tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
-2. Run the installer
-3. Select "Desktop development with C++"
-4. Make sure these are checked:
-   - MSVC v143 - VS 2022 C++ x64/x86 build tools (or latest)
-   - Windows 10/11 SDK
-   - C++ CMake tools for Windows
-5. Install (requires ~6-8 GB)
-6. Restart your terminal/PowerShell
-7. Try installing pandas again:
-   ```bash
-   pip install pandas
-   ```
+## 💻 How to Upgrade Compiler (For Latest Pandas)
 
-**Option B: Install Visual Studio 2022 Community (Full IDE)**
-1. Download: https://visualstudio.microsoft.com/vs/community/
-2. During installation, select "Desktop development with C++"
-3. Install and restart
-4. Try installing pandas
+### Option 1: Install Visual Studio 2022 Build Tools (Recommended)
 
-**Option C: Update Existing Visual Studio**
-1. Open "Visual Studio Installer" (search in Start menu)
-2. Click "Modify" on your installed version
-3. Select "Desktop development with C++"
-4. Click "Modify" to install
+**Step 1: Download**
+- URL: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+- Click "Download Build Tools for Visual Studio 2022"
 
-**After Installing Compiler:**
-```bash
-# Verify compiler is available
+**Step 2: Install**
+1. Run the downloaded installer (`vs_BuildTools.exe`)
+2. In the Workloads tab, select **"Desktop development with C++"**
+3. In the Installation details panel (right side), ensure these are checked:
+   - ✅ MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)
+   - ✅ Windows 11 SDK (or Windows 10 SDK)
+   - ✅ C++ CMake tools for Windows
+   - ✅ Testing tools core features - Build Tools
+4. Click **"Install"** (requires ~6-8 GB disk space)
+5. Wait for installation to complete (10-20 minutes)
+
+**Step 3: Verify Installation**
+```powershell
+# Open NEW PowerShell/CMD window (important!)
 where cl
 
-# Try installing pandas again
+# Should show path like:
+# C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.xx.xxxxx\bin\Hostx64\x64\cl.exe
+```
+
+**Step 4: Install Pandas**
+```bash
 pip install pandas
 ```
 
-#### Solution 5: Use Conda Instead of Pip (Easiest - No Compiler Needed)
+### Option 2: Install Visual Studio 2022 Community (Full IDE)
+
+1. Download: https://visualstudio.microsoft.com/vs/community/
+2. Run installer
+3. Select **"Desktop development with C++"** workload
+4. Click Install
+5. Restart and try: `pip install pandas`
+
+### Option 3: Update Existing Visual Studio
+
+1. Open **"Visual Studio Installer"** (search in Start menu)
+2. Find your installed version
+3. Click **"Modify"**
+4. Select **"Desktop development with C++"**
+5. Click **"Modify"** to install
+6. Restart terminal and try: `pip install pandas`
+
+---
+
+## 🐍 Alternative: Use Conda (No Compiler Needed)
 ```bash
 # Install Miniconda from https://docs.conda.io/en/latest/miniconda.html
 conda create -n commodities python=3.11
