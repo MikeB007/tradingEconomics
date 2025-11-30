@@ -1,0 +1,133 @@
+================================================================================
+COMMODITIES SCRAPER - DEPLOYMENT INSTRUCTIONS
+================================================================================
+
+PREREQUISITES:
+--------------
+1. Python 3.8 or higher
+2. MySQL Server 5.7+ or 8.0+
+3. Internet connection
+
+DEPLOYMENT STEPS:
+-----------------
+
+Step 1: Install Python Dependencies
+------------------------------------
+Open Command Prompt or PowerShell and run:
+    pip install -r requirements.txt
+
+Step 2: Install and Configure MySQL
+------------------------------------
+1. Install MySQL Server from https://dev.mysql.com/downloads/mysql/
+2. Set root password during installation
+3. Ensure MySQL service is running:
+    Get-Service MySQL*
+
+Step 3: Configure the Script
+-----------------------------
+Edit commodities_scraper.py and update these settings:
+
+1. DATABASE CONFIGURATION (around line 953):
+    db_config = {
+        'host': 'localhost',
+        'user': 'root',
+        'password': 'YOUR_MYSQL_PASSWORD',
+        'database': 'commodities_db'
+    }
+
+2. NOTIFICATION SETTINGS (around line 961):
+    notifications_enabled = False  # Set to True to enable alerts
+    
+    notification_config = {
+        'smtp_server': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'sender_email': 'your_email@gmail.com',
+        'sender_password': 'your_app_password'
+    }
+
+3. SUBSCRIPTIONS (around line 968):
+    subscriptions = [
+        Subscription(commodity_name='Lithium', email='your@email.com', min_percent_change=1.0),
+        Subscription(commodity_name='Gold', email='your@email.com', min_percent_change=1.0),
+        Subscription(commodity_name='Silver', email='your@email.com', min_percent_change=1.0),
+        Subscription(commodity_name='Platinum', email='your@email.com', min_percent_change=1.0),
+    ]
+
+Step 4: Test the Script
+------------------------
+Run manually to verify everything works:
+    python commodities_scraper.py
+
+The script will:
+- Create the database automatically
+- Create all tables
+- Scrape and save data
+- Display reports
+
+Step 5: Schedule Daily Runs at 5 AM
+------------------------------------
+
+METHOD 1: Using PowerShell (Run as Administrator)
+--------------------------------------------------
+Copy and paste this into PowerShell:
+
+$action = New-ScheduledTaskAction -Execute "python.exe" -Argument "commodities_scraper.py" -WorkingDirectory "C:\FULL\PATH\TO\TradingEconomics"
+
+$trigger = New-ScheduledTaskTrigger -Daily -At 5:00AM
+
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -DontStopIfGoingOnBatteries -AllowStartIfOnBatteries
+
+Register-ScheduledTask -TaskName "CommoditiesScraperDaily" -Action $action -Trigger $trigger -Settings $settings -Description "Daily commodities data collection at 5 AM"
+
+METHOD 2: Using Task Scheduler GUI
+-----------------------------------
+1. Press Win + R, type: taskschd.msc
+2. Click "Create Basic Task"
+3. Name: Commodities Scraper Daily
+4. Trigger: Daily at 5:00 AM
+5. Action: Start a program
+   - Program: python.exe
+   - Arguments: commodities_scraper.py
+   - Start in: C:\FULL\PATH\TO\TradingEconomics
+6. Finish
+
+METHOD 3: Using Batch File (Recommended)
+-----------------------------------------
+1. Use the provided run_commodities_scraper.bat file
+2. Schedule this batch file in Task Scheduler instead
+3. Logs will be saved in the logs\ directory
+
+ACCESSING THE DATABASE:
+-----------------------
+Using MySQL Command Line:
+    mysql -u root -p
+    USE commodities_db;
+    SELECT * FROM commodities_daily WHERE date = CURDATE();
+    SELECT * FROM strong_leads_daily ORDER BY ranking;
+
+Using MySQL Workbench (GUI):
+    Download from https://dev.mysql.com/downloads/workbench/
+    Connect with your credentials
+
+TROUBLESHOOTING:
+----------------
+- If Python not found: Add Python to PATH environment variable
+- If MySQL connection fails: Check MySQL service is running
+- If pip install fails: Try "python -m pip install -r requirements.txt"
+- Check logs folder for execution logs
+
+MAINTENANCE:
+------------
+- Database automatically cleans up old data (no manual maintenance)
+- Check logs periodically for any errors
+- Monitor disk space for database growth
+
+SUPPORT:
+--------
+For issues, check the following:
+1. Python version: python --version
+2. MySQL status: Get-Service MySQL*
+3. Package installation: pip list
+4. Recent logs in logs\ directory
+
+================================================================================
