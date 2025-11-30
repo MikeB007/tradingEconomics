@@ -25,12 +25,45 @@ pip install -r requirements.txt --prefer-binary
 pip install pandas==2.0.3
 ```
 
-#### Solution 3: Install Build Tools (if needed)
-If building from source is required, install Microsoft C++ Build Tools:
-- Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-- Install "Desktop development with C++"
+#### Solution 4: Upgrade C++ Compiler (If you need latest pandas)
 
-#### Solution 4: Use Conda Instead of Pip
+**Option A: Install Visual Studio 2019 or 2022 Build Tools**
+1. Download Build Tools: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+2. Run the installer
+3. Select "Desktop development with C++"
+4. Make sure these are checked:
+   - MSVC v143 - VS 2022 C++ x64/x86 build tools (or latest)
+   - Windows 10/11 SDK
+   - C++ CMake tools for Windows
+5. Install (requires ~6-8 GB)
+6. Restart your terminal/PowerShell
+7. Try installing pandas again:
+   ```bash
+   pip install pandas
+   ```
+
+**Option B: Install Visual Studio 2022 Community (Full IDE)**
+1. Download: https://visualstudio.microsoft.com/vs/community/
+2. During installation, select "Desktop development with C++"
+3. Install and restart
+4. Try installing pandas
+
+**Option C: Update Existing Visual Studio**
+1. Open "Visual Studio Installer" (search in Start menu)
+2. Click "Modify" on your installed version
+3. Select "Desktop development with C++"
+4. Click "Modify" to install
+
+**After Installing Compiler:**
+```bash
+# Verify compiler is available
+where cl
+
+# Try installing pandas again
+pip install pandas
+```
+
+#### Solution 5: Use Conda Instead of Pip (Easiest - No Compiler Needed)
 ```bash
 # Install Miniconda from https://docs.conda.io/en/latest/miniconda.html
 conda create -n commodities python=3.11
@@ -38,7 +71,7 @@ conda activate commodities
 conda install pandas beautifulsoup4 requests lxml mysql-connector-python
 ```
 
-#### Solution 5: Install Dependencies One by One
+#### Solution 6: Install Dependencies One by One
 ```bash
 pip install --upgrade pip setuptools wheel
 pip install numpy
