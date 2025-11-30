@@ -121,3 +121,96 @@ python --version
 ```
 
 If using older Python (< 3.8), upgrade to Python 3.10 or 3.11.
+
+---
+
+## ⚠️ Common Error: Python Architecture Mismatch
+
+### Error Message
+```
+Need python for x86_64, but found x86
+Python dependency not found
+```
+
+### Root Cause
+You have **32-bit Python** but **64-bit compiler** (or vice versa). They must match.
+
+### Solution: Install 64-bit Python
+
+1. **Check current Python:**
+   ```powershell
+   python -c "import struct; print(struct.calcsize('P') * 8, 'bit')"
+   # If it shows "32 bit", you need 64-bit Python
+   ```
+
+2. **Download 64-bit Python:**
+   - Go to: https://www.python.org/downloads/
+   - Download **"Windows installer (64-bit)"** for Python 3.11 or 3.12
+   - **IMPORTANT:** Choose the 64-bit version, NOT 32-bit
+
+3. **During installation:**
+   - ✅ Check "Add Python to PATH"
+   - Choose "Customize installation"
+   - ✅ Check "Install for all users" (optional)
+   - Click Install
+
+4. **Verify 64-bit installation:**
+   ```powershell
+   # Close and reopen terminal
+   python -c "import struct; print(struct.calcsize('P') * 8, 'bit')"
+   # Should show "64 bit"
+   ```
+
+5. **Now install pandas:**
+   ```bash
+   pip install pandas
+   # OR use compatible version:
+   pip install -r requirements_compatible.txt
+   ```
+
+### Alternative: Use 32-bit Compiler (Not Recommended)
+If you must keep 32-bit Python, uninstall 64-bit Build Tools and install 32-bit version (much less common, not recommended).
+
+---
+
+## 🚨 32-bit Python 3.12 - No Pre-built Pandas Wheels
+
+**Problem:** Pandas stopped providing 32-bit wheels for Python 3.12+
+
+**Solutions:**
+
+### Option 1: Downgrade to Python 3.11 (32-bit) - RECOMMENDED
+```bash
+# Download Python 3.11 32-bit from:
+https://www.python.org/ftp/python/3.11.9/python-3.11.9.exe
+
+# After installation:
+pip install pandas==2.1.4
+pip install requests beautifulsoup4 lxml mysql-connector-python
+```
+
+### Option 2: Upgrade to Python 3.12 (64-bit) - BEST LONG-TERM
+```bash
+# Download 64-bit Python 3.12:
+https://www.python.org/downloads/
+
+# Install and then:
+pip install -r requirements_compatible.txt
+```
+
+### Option 3: Use Conda (Works with 32-bit)
+```bash
+# Download Miniconda 32-bit:
+https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86.exe
+
+# Install and then:
+conda create -n commodities python=3.11
+conda activate commodities
+conda install pandas requests beautifulsoup4 lxml
+pip install mysql-connector-python
+```
+
+### Why This Happens
+- Pandas 2.x stopped building 32-bit wheels for Python 3.12+
+- Your pip tries to build from source → hits architecture mismatch
+- **You need either:** Python 3.11 (32-bit) OR Python 3.12 (64-bit)
